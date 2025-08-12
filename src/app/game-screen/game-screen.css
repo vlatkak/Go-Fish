@@ -1,20 +1,31 @@
-.deck{
+.hand_container{
+  padding: 0px;
+  height: 186px;
+  border: 1px solid black;
   display: flex;
-  flex-direction: row;
 }
-button{
-  aspect-ratio: 3/4;
-  width: 99px;
-  height: 132px;
-  margin: 5px;
+.card_button{
+  background-size: contain;
+  background-color: transparent;
+  border: none;
+  aspect-ratio: 3/4 !important;
+  align-self: flex-end;
+  transition: margin-bottom 0.2s linear;
+  color: lightgreen;
+  margin-left: 0px;
 }
+.card_button:hover{
+  margin-bottom: 44px;
+}
+
 .opponent_cards{
-  aspect-ratio: 3/4;
-  width: 99px;
-  height: 132px;
-  margin: 5px;
-  background-color: gray;
+  display: inline-block;
+  padding: 0px;
+  background-image: url("../../assets/card_back.png");
+  background-size: contain;
+  background-color: transparent;
+  aspect-ratio: 3/4 !important;
   border-radius: 3px;
-  text-align: center;
-  align-items: center;
+  color: lightgreen;
+  align-self: flex-end;
 }

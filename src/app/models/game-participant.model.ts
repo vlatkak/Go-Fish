@@ -1,4 +1,5 @@
 import {Card} from './card.model';
+import {RECIEVED_TYPE} from '../constants/constants';
 
 export class GameParticipant {
   cardHand: Array<Card>;
@@ -8,22 +9,26 @@ export class GameParticipant {
     this.cardHand= cardDeck;
   }
 
-  receiveCards(cards: Array<Card>, deck: Array<Card>, desiredRank: String): boolean {
+  receiveCards(cards: Array<Card>, deck: Array<Card>, desiredRank: String): number {
     if(cards.length == 0){
       let pulledCard: Card | undefined = this.pullFromDeck(deck);
       if(pulledCard !== undefined) {
         this.cardHand = this.cardHand.concat(pulledCard)
         this.checkIfSetComplete()
-        return pulledCard?.rank == desiredRank;
+        if(pulledCard.rank==desiredRank){
+          return RECIEVED_TYPE.CARD_FROM_DECK
+        }else{
+          return RECIEVED_TYPE.NONE_DESIRED
+        }
       }else{
-        return false
+        return RECIEVED_TYPE.NONE_DESIRED
       }
     }
     this.cardHand = this.cardHand.concat(cards);
     this.checkIfSetComplete()
     console.log(cards)
     console.log(this.cardHand)
-    return true;
+    return RECIEVED_TYPE.CARD_FROM_PLAYER;
   }
 
   giveCards(rank: String): Array<Card>{
