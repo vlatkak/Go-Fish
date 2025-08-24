@@ -1,9 +1,11 @@
 import {Card} from './card.model';
-import {RECIEVED_TYPE} from '../constants/constants';
+import {RECEIVED_TYPE} from '../constants/constants';
 
 export class GameParticipant {
   cardHand: Array<Card>;
   completeSetNum: number = 0;
+  soundEffects = {success: "", failure: "", completedSet: ""}
+  sprites = {receivingCard: "", givingCard: "", collectedSet: "", drawingCard: ""}
 
   constructor(cardHand: Array<Card>) {
     this.cardHand= cardHand;

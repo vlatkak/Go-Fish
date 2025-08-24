@@ -8,17 +8,17 @@
         <div id="opponent_hand_container" class="hand_container" [ngStyle]="{'width': cardContainerWidthStr}">
           <div class="opponent_cards"
              *ngFor="let c of opponent.cardHand"
-             [ngStyle]="{'margin-right': setCardButtonMargins('O'), 'width': cardWidthStr}">
+             [ngStyle]="{'margin-right': setCardElementMargins('O'), 'width': cardWidthStr}">
           </div>
         </div>
       </div>
       <div id="player_wrapper" class="hand_containers_wrapper">
         <div id="player_hand_container" class="hand_container" [ngStyle]="{'width': cardContainerWidthStr}">
           <button class="card_button"
-                  (click)="onCardButtonClick(c.rank)"
+                  (click)="onCardElementClick(c.rank)"
                   *ngFor="let c of player.cardHand"
-                  [disabled]="!playerCardButtonClickable"
-                  [ngStyle]="{'margin-right': setCardButtonMargins('P'), 'width': cardWidthStr, 'background-image': setCardButtonSprite(c)}">
+                  [disabled]="!playerCardElementClickable"
+                  [ngStyle]="{'margin-right': setCardElementMargins('P'), 'width': cardWidthStr, 'background-image': setCardElementSprite(c)}">
           </button>
         </div>
       </div>
@@ -32,9 +32,6 @@
       </div>
       <div id="game_stats_div" class="row">
         <div id="left_stats_col" class="col-4 stats_col">
-          <button id="exitBtn" type="button" [routerLink]="['/']">
-            EXIT GAME
-          </button>
         </div>
         <div id="middle_stats_col" class="col-4 stats_col">
           <p id="timer">{{timerDisplayString}}</p>

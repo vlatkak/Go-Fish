@@ -10,5 +10,5 @@
       Otherwise, it’s the opponents turn.</p>
     <p>You play until both of you have run out of cards.</p>
   </div>
-  <button id="start_btn" (click)="startGame()">PLAY</button>
+  <button id="start_btn" [routerLink]="['/game']" (click)="playBackgroundMusic()">PLAY</button>
 </div>

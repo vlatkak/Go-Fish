@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {CARD_RANKS, RECIEVED_TYPE} from "../../constants/constants"
+import {CARD_RANKS, RECEIVED_TYPE} from "../../constants/constants"
 import {CARD_SUITS} from '../../constants/constants';
 import {CARD_UI_DIMENSIONS} from '../../constants/constants';
 import {GAME_STATES} from '../../constants/constants';
@@ -7,24 +7,24 @@ import {NgForOf, NgStyle} from '@angular/common';
 import {Card} from '../../models/card.model';
 import {Opponent} from '../../models/opponent.model';
 import {Player} from '../../models/player.model';
-import {CanDeactivate, RouterLink} from '@angular/router';
+import {CanDeactivate, Router} from '@angular/router';
 import {CanDeactivateRoute} from '../../routerGuard/routerGuardImplementation';
-
+import {GameParticipant} from '../../models/game-participant.model';
 
 @Component({
   selector: 'app-game-screen',
   imports: [
     NgForOf,
     NgStyle,
-    RouterLink
   ],
   templateUrl: './game-screen.html',
   styleUrl: './game-screen.css'
 })
-export class GameScreen implements CanDeactivateRoute{
-  cardRankList :String[] = ["2", "3", "4", "5", "6", "7"];
-  /*cardRankList :String[] = ["2", "3", "4", "5", "6", "7", "8", "9", "10",
-    CARD_RANKS.JACK, CARD_RANKS.QUEEN, CARD_RANKS.KING, CARD_RANKS.ACE];*/
+export class GameScreen{
+
+  /*cardRankList :String[] = ["2", "3", "4", "5", "6", "7"];*/
+  cardRankList :String[] = ["2", "3", "4", "5", "6", "7", "8", "9", "10",
+    CARD_RANKS.JACK, CARD_RANKS.QUEEN, CARD_RANKS.KING, CARD_RANKS.ACE];
   cardSuitList :String[] = [CARD_SUITS.CLUBS, CARD_SUITS.SPADES,
     CARD_SUITS.DIAMONDS, CARD_SUITS.HEARTS];
 
@@ -38,12 +38,18 @@ export class GameScreen implements CanDeactivateRoute{
   opponent! : Opponent;
 
   playersTurn : boolean = true;
-  playerCardButtonClickable : boolean = true;
+  playerCardElementClickable : boolean = true;
   whoseTurnText = "PLAYER'S TURN"
+  gameEnded = false;
+  gameExited = false;
   infoText = "...";
 
   secondsElapsed = 0;
   timerDisplayString = "00:00:00"
+
+  audio = new Audio();
+
+  constructor(private router: Router) { }
 
   ngOnInit() {
 
@@ -57,12 +63,21 @@ export class GameScreen implements CanDeactivateRoute{
     setInterval(() => this.updateTimer(), 1000)
 
     //Game loop
-    this.gameLoop().then(r => console.log("GAME END"))
+    this.gameLoop().then(r => console.log("end"))
+  }
+
+  ngOnDestroy(){
+    this.audio.muted = true;
   }
 
   async gameLoop() {
+    if(this.gameExited){
+      return
+    }
     if (this.player.cardHand.length == 0 && this.opponent.cardHand.length == 0) {
       this.gameStateImage = GAME_STATES.IDLE
+      this.gameEnded=true
+      this.router.navigate(['/end', this.player.completeSetNum, this.opponent.completeSetNum, this.secondsElapsed])
       return
     }
     if (this.playersTurn) {
@@ -72,8 +87,7 @@ export class GameScreen implements CanDeactivateRoute{
       this.opponent.cardsAskedForMemory=[]
 
       if (this.player.cardHand.length == 0) {
-        this.gameStateImage = GAME_STATES.PLAYER_DRAWS
-        console.log("Player out of cards. Pulling from deck.");
+        this.infoText = "You ran out of cards, so you pulled one from the deck.";
         let pulledCard = this.player.pullFromDeck(this.cardDeck);
         if (pulledCard !== undefined) {
           this.player.cardHand.push(pulledCard);
@@ -82,104 +96,108 @@ export class GameScreen implements CanDeactivateRoute{
 
       return
     } else {
-      this.playerCardButtonClickable = false;
+      this.playerCardElementClickable = false;
       console.log("OPPONENTS TURN")
       this.gameStateImage = GAME_STATES.IDLE
       this.whoseTurnText = "OPPONENT'S TURN"
 
-      await this.opponentAskPlayerForCard()
+      let chosenRank: String = this.opponent.askForCard(this.cardDeck)
+      this.opponent.addToCardsAskedForMemory(chosenRank)
+      await this.askAndReceiveCards(this.opponent, chosenRank)
       this.infoText="..."
 
       await this.gameLoop()
     }
   }
 
-  async askOpponentForCard(desiredRank: String): Promise<void> {
-    this.playerCardButtonClickable = false;
-    this.opponent.addToPlayersCardsMemory(desiredRank)
+  async askAndReceiveCards(participant: GameParticipant, desiredRank: String){
+    let titleOfParticipant : String = ""
+    let cardsReceivedFromOther : Array<Card> = []
+    if(participant instanceof Opponent){
+      titleOfParticipant = "Opponent"
+    }
+    else{
+      titleOfParticipant = "You"
+      this.playerCardElementClickable = false
+    }
 
-    this.infoText = "You asked for the rank " + desiredRank + ".";
+    this.infoText = titleOfParticipant+" asked for the rank " + desiredRank + ".";
     await this.waitFewSeconds()
+    if(participant instanceof Opponent){
+      cardsReceivedFromOther = this.player.giveCards(desiredRank)
+    }
+    else{
+      cardsReceivedFromOther = this.opponent.giveCards(desiredRank)
+    }
     let receivedCards: Array<Card> = []
-    let opponentsCards: Array<Card> = this.opponent.giveCards(desiredRank);
 
-    if(opponentsCards.length == 0){
-      let pulledCard = this.player.pullFromDeck(this.cardDeck)
+    if(cardsReceivedFromOther.length==0){
+      let pulledCard = participant.pullFromDeck(this.cardDeck)
       if(pulledCard !== undefined){
-        this.gameStateImage = GAME_STATES.PLAYER_DRAWS
+        this.gameStateImage = participant.sprites.drawingCard
         receivedCards.push(pulledCard);
         if(pulledCard.rank==desiredRank){
-          this.infoText = "You received your desired rank from the deck.";
-          this.playersTurn = true;
-          this.playerCardButtonClickable = true;
+          this.infoText = titleOfParticipant+" received desired rank from the deck.";
+          this.playAudio(participant.soundEffects.success)
         }
         else{
-          this.infoText = "You didn't receive your desired rank.";
-          this.playersTurn = false;
+          this.infoText = titleOfParticipant+" didn't receive desired rank.";
+          this.playAudio(participant.soundEffects.failure)
         }
       }
     }
     else{
-      receivedCards = opponentsCards
-      this.gameStateImage = GAME_STATES.OPPONENT_GIVES
-      this.infoText = "You received "+receivedCards.length+" card(s) from the opponent.";
-      this.playersTurn = true;
-      this.playerCardButtonClickable = true;
+      receivedCards = cardsReceivedFromOther
+      this.gameStateImage = participant.sprites.receivingCard
+      this.infoText = titleOfParticipant+" received "+receivedCards.length+" card(s).";
+      if(receivedCards.length==0){
+        this.playAudio(participant.soundEffects.failure)
+      }
+      else{
+        this.playAudio(participant.soundEffects.success)
+      }
     }
-    this.player.receiveCards(receivedCards)
+    participant.receiveCards(receivedCards)
     await this.waitFewSeconds()
 
-    if(this.player.checkIfSetComplete(receivedCards[0].rank)){
+    if(participant.checkIfSetComplete(receivedCards[0].rank)){
+      this.gameStateImage = participant.sprites.collectedSet
       console.log("Successful check for completed set")
-      this.infoText = "You've completed a set of cards."
+      this.infoText = titleOfParticipant+" completed a set of cards."
+      this.playAudio(participant.soundEffects.completedSet)
       await this.waitFewSeconds()
+    }
+
+    if(receivedCards[0].rank==desiredRank){
+      if(participant instanceof Opponent){
+        this.playersTurn=false
+        this.playerCardElementClickable=false
+      }
+      else{
+        this.playersTurn=true
+        this.playerCardElementClickable=true
+      }
+    }
+    else{
+      if(participant instanceof Opponent){
+        this.playersTurn=true
+        this.playerCardElementClickable=true
+      }
+      else{
+        this.playersTurn=false
+        this.playerCardElementClickable=false
+      }
     }
   }
 
-  async onCardButtonClick(rank: String) {
-    await this.askOpponentForCard(rank)
+  async onCardElementClick(rank: String) {
+    this.opponent.addToPlayersCardsMemory(rank)
+    await this.askAndReceiveCards(this.player, rank)
     this.infoText="..."
     await this.gameLoop()
   }
 
-  async opponentAskPlayerForCard(): Promise<void> {
-    let chosenRank: String = this.opponent.askForCard(this.cardDeck)
-    this.opponent.addToCardsAskedForMemory(chosenRank)
-    this.infoText = "Opponent asked for the rank " + chosenRank + ".";
-    await this.waitFewSeconds()
-    let playersCards : Array<Card> = this.player.giveCards(chosenRank)
-    let receivedCards: Array<Card> = []
-
-    if(playersCards.length == 0){
-      let pulledCard = this.opponent.pullFromDeck(this.cardDeck)
-      if(pulledCard !== undefined) {
-        this.gameStateImage = GAME_STATES.OPPONENT_DRAWS
-        receivedCards.push(pulledCard);
-        if (pulledCard.rank == chosenRank) {
-          this.infoText = "Opponent received his desired rank from the deck.";
-        } else {
-          this.infoText = "Opponent didn't receive his desired rank.";
-          this.playersTurn = true;
-          this.playerCardButtonClickable = true;
-        }
-      }
-    }
-    else{
-      receivedCards = playersCards
-      this.gameStateImage = GAME_STATES.PLAYER_GIVES
-      this.infoText = "Opponent received "+receivedCards.length+" card(s) from you.";
-    }
-    this.opponent.receiveCards(receivedCards)
-    await this.waitFewSeconds()
-
-    if(this.opponent.checkIfSetComplete(receivedCards[0].rank)){
-      this.infoText = "Opponent completed a set of cards."
-      this.gameStateImage = GAME_STATES.OPPONENT_GOT_SET
-      await this.waitFewSeconds()
-    }
-  }
-
-  setCardButtonMargins(whoseCards: String): string{
+  setCardElementMargins(whoseCards: String): string{
     let cardHand!: Array<Card>
     if(whoseCards == "P"){
       cardHand = this.player.cardHand
@@ -199,7 +217,7 @@ export class GameScreen implements CanDeactivateRoute{
     return "10px";
   }
 
-  setCardButtonSprite(card: Card): string{
+  setCardElementSprite(card: Card): string{
     let rankImageString
     let suitImageString
     if(isNaN(Number(card.rank))){
@@ -227,7 +245,7 @@ export class GameScreen implements CanDeactivateRoute{
 
   dealCards(): Array<Card> {
     let dealtArray : Array<Card> = [];
-    for(let i=0; i<3; i++){
+    for(let i=0; i<7; i++){
       dealtArray.push(<Card>this.cardDeck.pop());
     }
     return dealtArray;
@@ -252,25 +270,35 @@ export class GameScreen implements CanDeactivateRoute{
   }
 
   confirmForReroute(): Promise<boolean> {
+    if(this.gameEnded){
+      return new Promise(resolve => resolve(true))
+    }
+
     return new Promise(resolve => {
-      // Get the modal element
       const myModal = document.getElementById('confirmExit')!;
       const confirmExit = new (window as any).bootstrap.Modal(myModal);
 
-      // Hook up buttons
       myModal.querySelector('#exit')?.addEventListener('click', () => {
         confirmExit.hide();
-        resolve(true); // allow navigation
+        this.gameExited=true;
+        resolve(true);
       });
 
       myModal.querySelector('#dont_exit')?.addEventListener('click', () => {
         confirmExit.hide();
-        resolve(false); // stay on page
+        resolve(false);
         history.pushState(null, '', window.location.href);
       });
 
-      // Show modal
       confirmExit.show();
     })
   }
+
+  playAudio(resource: string){
+    this.audio.src = resource;
+    this.audio.volume = 0.5;
+    this.audio.load()
+    this.audio.play()
+  }
+  //može se popraviti da ne reloada zvuk svaki put
 }

@@ -6,6 +6,18 @@ export class Opponent extends GameParticipant {
   playersCardsMemory: Array<String> = []
   cardsAskedForMemory: Array<String> = []
 
+  constructor(cardHand: Array<Card>) {
+    super(cardHand);
+    this.soundEffects.success="../assets/audio/success-opponent.mp3"
+    this.soundEffects.failure="../assets/audio/failure-opponent.mp3"
+    this.soundEffects.completedSet="../assets/audio/complete-set-opponent.mp3"
+
+    this.sprites.receivingCard = "../../assets/opponent/receiving_card.png"
+    this.sprites.givingCard = "../../assets/opponent/giving_card.png"
+    this.sprites.collectedSet = "../../assets/opponent/got_set.png"
+    this.sprites.drawingCard = "../../assets/opponent/drawing_card.png"
+  }
+
   askForCard(deck: Array<Card>) : String {
     console.log("Cards opponent asked for in this round: "+this.cardsAskedForMemory);
     //Checking if it has any of the ranks that the player recently asked
