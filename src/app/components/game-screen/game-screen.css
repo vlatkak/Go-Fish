@@ -1,0 +1,183 @@
+
+#content_container{
+  width: 100%;
+  margin: 0px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #406947;
+}
+
+.row{
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+}
+
+#image_div{
+  margin: 0;
+  padding: 0;
+}
+#game_image{
+  aspect-ratio: 1/1;
+  width: 100%;
+  background-color: #406947;
+}
+
+.hand_container{
+  padding: 0px;
+  display: flex;
+}
+
+#cards_div{
+  display: flex;
+  flex-direction: column;
+  padding: 0px;
+  padding-left: 33px;
+  margin: 0px;
+}
+.hand_containers_wrapper{
+  padding: 0px;
+  margin: 0px;
+  width: 100%;
+  height: calc(50% - 33px);
+}
+
+#opponent_wrapper{
+  margin-top: 33px;
+}
+#opponent_hand_container{
+  height: 132px;
+}
+.opponent_cards{
+  display: inline-block;
+  padding: 0px;
+  background-image: url("../../../assets/card_back.png");
+  background-size: contain;
+  background-color: transparent;
+  aspect-ratio: 3/4 !important;
+  /*color: black;*/
+  align-self: flex-end;
+}
+
+#player_wrapper{
+  display: flex;
+  align-items: flex-end;
+}
+#player_hand_container{
+  height: 165px;
+}
+.card_button{
+  background-size: contain;
+  background-color: transparent;
+  border: none;
+  aspect-ratio: 3/4 !important;
+  align-self: flex-end;
+  transition: margin-bottom 0.2s linear;
+  /*color: lightgreen;*/
+  margin-left: 0px;
+}
+.card_button:hover{
+  margin-bottom: 33px;
+}
+
+#HUD_bar_background{
+  padding-left: 66px;
+  padding-right: 66px;
+  box-shadow: 0 0 20px 5px #2a4a30 inset;
+  background-color: #406947;
+  color: #F6E8DA;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+#HUD_bar{
+}
+#info_text_div{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0;
+  margin: 0;
+}
+#whose_turn_text{
+  text-align: left;
+  padding: 0px;
+  margin: 0px;
+  font-size: 2em;
+}
+#help_text{
+  text-align: left;
+  padding: 0px;
+  margin-bottom: 0.5em;
+  font-size: 1.2em;
+  font-style: italic;
+}
+#game_stats_div{
+  border-top: #F6E8DA solid 2px;
+  height: auto;
+}
+.stats_col{
+  padding: 0px;
+  padding-top: 0.5em;
+  margin: 0px;
+}
+#exitBtn{
+  padding: 0;
+  margin: 0;
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid #F6E8DA;
+  color: #F6E8DA;
+}
+#middle_stats_col{
+  text-align: center;
+}
+#right_stats_col{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+.set_count_text{
+  text-align: right;
+  margin: 0px;
+  padding: 0px;
+}
+
+.modal-dialog{
+  padding: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content{
+  background-color: #F6E8DA;
+  border-radius: 11px;
+}
+.modal-header{
+  border: none;
+}
+.btn-close:focus{
+  box-shadow: none;
+}
+.modal-body{
+  font-size: 1em;
+  font-style: italic;
+}
+.modal-footer{
+  border: none;
+}
+.btn-primary{
+  background-color: #E60C08;
+  color: #F6E8DA;
+  border: none;
+  border-radius: 11px;
+}
+.btn-primary:focus{
+  background-color: #bf0502;
+}

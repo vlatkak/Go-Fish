@@ -3,59 +3,62 @@ import {Card} from './card.model';
 export class GameParticipant {
   cardHand: Array<Card>;
   completeSetNum: number = 0;
+  soundEffects = {success: "", failure: "", completedSet: ""}
+  sprites = {receivingCard: "", givingCard: "", collectedSet: "", drawingCard: ""}
 
-  constructor(cardDeck: Array<Card>) {
-    this.cardHand= cardDeck;
+  constructor(cardHand: Array<Card>) {
+    this.cardHand= cardHand;
   }
 
-  receiveCards(cards: Array<Card>, deck: Array<Card>, desiredRank: String): boolean {
-    if(cards.length == 0){
-      let pulledCard: Card | undefined = this.pullFromDeck(deck);
-      if(pulledCard !== undefined) {
-        this.cardHand = this.cardHand.concat(pulledCard)
-        this.checkIfSetComplete()
-        return pulledCard?.rank == desiredRank;
-      }else{
-        return false
-      }
-    }
-    this.cardHand = this.cardHand.concat(cards);
-    this.checkIfSetComplete()
-    console.log(cards)
-    console.log(this.cardHand)
-    return true;
+  receiveCards(cardsReceived: Array<Card>): void {
+    this.cardHand = this.cardHand.concat(cardsReceived);
   }
 
   giveCards(rank: String): Array<Card>{
     let chosenCards: Array<Card> = this.cardHand.filter(c => c.rank == rank);
     this.cardHand = this.cardHand.filter(c => c.rank !== rank);
     console.log("Given cards: "+chosenCards)
-    if(this.cardHand.length == 0){
-      console.log("No cards in hand for person to give.")
-    }
+
     return chosenCards;
   }
 
   pullFromDeck(deck: Array<Card>){
     if(deck.length > 0) {
-      let pulledCard: Card = <Card>deck.pop()
-      console.log("Card pulled from deck: " + pulledCard.rank +" of "+ pulledCard.suit)
-      return pulledCard;
+      return <Card>deck.pop();
     }
-    else{
-      return
-    }
+    return
   }
 
-  checkIfSetComplete(): void{
-    for(let c of this.cardHand){
-      let cardsOfRank: Array<Card> = this.cardHand.filter(c2 => c2.rank == c.rank);
-      if(cardsOfRank.length == 4){
-        this.cardHand = this.cardHand.filter(c2 => c2.rank !== c.rank);
-        this.completeSetNum = this.completeSetNum + 1
-        console.log("Set complete for rank "+c.rank)
+  refillEmptyHand(deck: Array<Card>): number{
+    let pulledCards: Array<Card> = []
+    while (deck.length > 0 && pulledCards.length < 5) {
+      let pulledCard = this.pullFromDeck(deck)
+      if (pulledCard !== undefined) {
+        pulledCards.push(pulledCard);
       }
     }
+    this.receiveCards(pulledCards)
+    return pulledCards.length
+  }
+
+  checkIfSetComplete(rank: String = ""): boolean{
+    let setsNum = 0;
+
+    let ranks: Set<String> = (rank=="")? new Set(this.cardHand.map(c => c.rank)) : new Set()
+    if(rank!==""){
+      ranks.add(rank)
+    }
+
+    for(let r of ranks){
+      let cardsOfRank: Array<Card> = this.cardHand.filter(c => c.rank == r);
+      if(cardsOfRank.length == 4){
+        this.cardHand = this.cardHand.filter(c => c.rank !== r);
+        this.completeSetNum = this.completeSetNum + 1
+        setsNum++
+        console.log("Set complete for rank "+r)
+      }
+    }
+    return setsNum > 0;
   }
 
 }

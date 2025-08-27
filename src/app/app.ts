@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import {GameScreen} from './game-screen/game-screen';
+import {GameScreen} from './components/game-screen/game-screen';
 
 @Component({
   selector: 'app-root',
