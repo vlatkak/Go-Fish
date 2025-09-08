@@ -1,0 +1,19 @@
+<div id="content_container">
+  <h2 id="title">GAME END.</h2>
+  <h1 id="who_won_text">{{whoWonText}}</h1>
+  <table>
+    <tr class="table_row">
+      <td class="title_column">YOUR SETS</td>
+      <td class="value_column">{{playersPoints}}</td>
+    </tr>
+    <tr class="table_row">
+      <td class="title_column">OPPONENT'S SETS</td>
+      <td class="value_column">{{opponentsPoints}}</td>
+    </tr>
+    <tr class="table_row">
+      <td class="title_column">TIME</td>
+      <td class="value_column">{{timeString}}</td>
+    </tr>
+  </table>
+  <button id="back_to_start_btn" [routerLink]="['/']">RETURN</button>
+</div>
