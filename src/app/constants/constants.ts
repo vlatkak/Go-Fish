@@ -12,7 +12,14 @@ export const CARD_SUITS = {
   SPADES: "Spades"
 }
 
-export const TURNS = {
-  PLAYER: 0,
-  OPPONENT: 1
+export const CARD_UI_DIMENSIONS = {
+  CARD_WIDTH: 99,
 }
+
+export const GAME_PARTICIPANT_TITLE = {
+  PLAYER: "You",
+  OPPONENT: "Opponent",
+}
+
+export const IDLE_STATE = "../../assets/opponent/idle.webp";
+
